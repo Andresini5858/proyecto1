@@ -1,0 +1,343 @@
+%CMF
+# %PSECTS Section
+# For each object file, details of its psects are enumerated here.
+# The begining of the section is indicated by %PSECTS.  The first
+# line indicates the name of the first object file, e.g.
+#    $foo.obj
+# Each line that follows describes a psect in that object file, until
+# the next object file.  The lines that describe a psect have the
+# format:
+#    <psect name> <class name> <space> <link address> <load addresses> <length> <delta> <reloc>
+# All addresses and the length are given in unqualified hexadecimal
+# in delta units.  Any other numeric values are decimal.
+%PSECTS
+$build/default/production/main.o
+CODE - 0 0 0 1B3 2 1
+udata_shr COMMON 1 70 70 F 1 1
+config CONFIG 4 2007 2007 2 2 1
+# %UNUSED Section
+# This section enumerates the unused ranges of each CLASS. Each entry
+# is described on a single line as follows:
+#    <class name> <range> <delta>
+# Addresses given in the range are in hexadecimal and units of delta.
+%UNUSED
+RAM 20-6F 1
+RAM A0-EF 1
+RAM 110-16F 1
+RAM 190-1EF 1
+BANK0 20-6F 1
+BANK1 A0-EF 1
+BANK2 110-16F 1
+BANK3 190-1EF 1
+CONST 1B3-1FFF 2
+ENTRY 1B3-1FFF 2
+IDLOC 2000-2003 2
+CODE 1B3-1FFF 2
+COMMON 7F-7F 1
+EEDATA 2100-21FF 2
+STRCODE 1B3-1FFF 2
+STRING 1B3-1FFF 2
+# %LINETAB Section
+# This section enumerates the file/line to address mappings.
+# The beginning of the section is indicated by %LINETAB.
+# The first line indicates the name of the first object file, e.g.
+#   $foo.obj
+# Each line that follows describes a single mapping until the next
+# object file.  Mappings have the following format:
+#    <address> <psect name> <class name> ><line number>:<file name>
+# The address is absolute and given given in unqualified hex 
+# in delta units of the psect. All mappings within an object file
+# are in ascending order of addresses.
+# All other numeric values are in decimal.
+%LINETAB
+$build/default/production/main.o
+0 CODE ABS >57:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+0 CODE ABS >58:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1 CODE ABS >63:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+4 CODE ABS >65:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+5 CODE ABS >66:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+6 CODE ABS >67:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+7 CODE ABS >70:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+8 CODE ABS >71:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+9 CODE ABS >72:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+A CODE ABS >75:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+B CODE ABS >76:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+C CODE ABS >77:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+D CODE ABS >78:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+E CODE ABS >79:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+F CODE ABS >82:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10 CODE ABS >93:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12 CODE ABS >94:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+13 CODE ABS >95:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+14 CODE ABS >96:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+15 CODE ABS >97:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16 CODE ABS >98:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+17 CODE ABS >101:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+18 CODE ABS >102:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19 CODE ABS >103:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A CODE ABS >104:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1B CODE ABS >105:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1C CODE ABS >106:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1D CODE ABS >107:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1E CODE ABS >110:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1F CODE ABS >111:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+20 CODE ABS >112:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+21 CODE ABS >113:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+22 CODE ABS >114:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+23 CODE ABS >115:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+24 CODE ABS >116:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+25 CODE ABS >117:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+26 CODE ABS >120:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+27 CODE ABS >121:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+28 CODE ABS >122:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+29 CODE ABS >123:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+2A CODE ABS >124:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+2B CODE ABS >125:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+2C CODE ABS >126:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+2D CODE ABS >127:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+2E CODE ABS >128:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+2F CODE ABS >131:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+30 CODE ABS >132:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+31 CODE ABS >133:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+32 CODE ABS >134:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+33 CODE ABS >135:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+34 CODE ABS >136:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+35 CODE ABS >137:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+36 CODE ABS >138:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+37 CODE ABS >139:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+38 CODE ABS >140:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+39 CODE ABS >147:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+100 CODE ABS >150:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+101 CODE ABS >151:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+102 CODE ABS >152:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+103 CODE ABS >153:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+104 CODE ABS >154:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+105 CODE ABS >155:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+106 CODE ABS >156:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+107 CODE ABS >157:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+108 CODE ABS >158:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+109 CODE ABS >159:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10A CODE ABS >160:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10B CODE ABS >161:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10C CODE ABS >162:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10D CODE ABS >163:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10E CODE ABS >164:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+10F CODE ABS >165:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+110 CODE ABS >166:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+111 CODE ABS >167:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+112 CODE ABS >168:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+113 CODE ABS >169:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+114 CODE ABS >172:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+116 CODE ABS >173:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+117 CODE ABS >174:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+118 CODE ABS >176:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+11A CODE ABS >177:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+11B CODE ABS >178:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+11C CODE ABS >179:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+11D CODE ABS >180:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+11E CODE ABS >181:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+11F CODE ABS >182:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+120 CODE ABS >183:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+121 CODE ABS >185:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+123 CODE ABS >186:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+124 CODE ABS >187:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+125 CODE ABS >188:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+126 CODE ABS >189:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+127 CODE ABS >190:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+128 CODE ABS >192:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12A CODE ABS >193:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12B CODE ABS >194:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12C CODE ABS >195:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12D CODE ABS >196:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12E CODE ABS >197:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+12F CODE ABS >199:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+131 CODE ABS >200:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+132 CODE ABS >201:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+133 CODE ABS >202:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+134 CODE ABS >203:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+135 CODE ABS >204:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+136 CODE ABS >206:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+138 CODE ABS >207:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+139 CODE ABS >208:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+13A CODE ABS >209:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+13B CODE ABS >210:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+13C CODE ABS >211:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+13D CODE ABS >213:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+13F CODE ABS >214:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+140 CODE ABS >215:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+141 CODE ABS >218:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+143 CODE ABS >219:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+144 CODE ABS >221:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+146 CODE ABS >222:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+147 CODE ABS >224:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+149 CODE ABS >225:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+14A CODE ABS >226:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+14B CODE ABS >227:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+14C CODE ABS >228:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+14D CODE ABS >230:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+14F CODE ABS >231:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+150 CODE ABS >232:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+151 CODE ABS >233:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+152 CODE ABS >234:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+153 CODE ABS >236:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+155 CODE ABS >237:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+156 CODE ABS >238:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+157 CODE ABS >239:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+158 CODE ABS >240:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+159 CODE ABS >242:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+15B CODE ABS >243:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+15C CODE ABS >244:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+15D CODE ABS >245:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+15E CODE ABS >247:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+15F CODE ABS >248:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+160 CODE ABS >249:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+161 CODE ABS >254:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+162 CODE ABS >255:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+163 CODE ABS >256:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+164 CODE ABS >257:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+165 CODE ABS >258:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+166 CODE ABS >259:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+167 CODE ABS >260:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+169 CODE ABS >261:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16A CODE ABS >262:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16B CODE ABS >265:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16C CODE ABS >266:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16D CODE ABS >267:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16E CODE ABS >268:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+16F CODE ABS >269:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+170 CODE ABS >270:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+171 CODE ABS >271:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+172 CODE ABS >272:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+173 CODE ABS >275:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+174 CODE ABS >276:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+175 CODE ABS >277:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+176 CODE ABS >278:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+177 CODE ABS >280:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+178 CODE ABS >281:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+17A CODE ABS >282:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+17B CODE ABS >283:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+17D CODE ABS >284:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+17E CODE ABS >285:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+17F CODE ABS >286:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+180 CODE ABS >287:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+181 CODE ABS >289:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+182 CODE ABS >290:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+183 CODE ABS >291:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+184 CODE ABS >292:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+185 CODE ABS >294:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+186 CODE ABS >295:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+188 CODE ABS >296:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+189 CODE ABS >297:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+18B CODE ABS >298:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+18C CODE ABS >299:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+18D CODE ABS >300:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+18E CODE ABS >301:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+18F CODE ABS >304:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+190 CODE ABS >305:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+191 CODE ABS >306:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+192 CODE ABS >307:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+193 CODE ABS >309:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+194 CODE ABS >310:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+196 CODE ABS >311:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+197 CODE ABS >312:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+199 CODE ABS >313:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19A CODE ABS >314:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19B CODE ABS >315:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19C CODE ABS >316:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19D CODE ABS >319:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19E CODE ABS >320:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+19F CODE ABS >321:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A0 CODE ABS >322:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A1 CODE ABS >324:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A2 CODE ABS >325:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A4 CODE ABS >326:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A5 CODE ABS >327:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A7 CODE ABS >328:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A8 CODE ABS >329:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1A9 CODE ABS >330:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1AA CODE ABS >331:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1AB CODE ABS >334:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1AC CODE ABS >335:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1AD CODE ABS >336:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1AE CODE ABS >337:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1B0 CODE ABS >338:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1B1 CODE ABS >339:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+1B2 CODE ABS >340:C:\Users\lemus\Documents\GitHub\proyecto1\proyecto.X\main.s
+# %SYMTAB Section
+# An enumeration of all symbols in the program.
+# The beginning of the section is indicated by %SYMTAB.
+# Each line describes a single symbol as follows:
+#    <label> <value> [-]<load-adj> <class> <space> <psect> <file-name>
+# The value and load-adj are both in unqualified hexadecimal.
+# All other numeric values are in decimal.  The load-adj is the
+# quantity one needs to add to the symbol value in order to obtain the load
+# address of the symbol.  This value may be signed. If the symbol
+# was defined in a psect then <psect> will be "-". File-name
+# is the name of the object file in which the symbol was defined.
+%SYMTAB
+__Hspace_0 1B3 0 ABS 0 - -
+__Hspace_1 7F 0 ABS 0 - -
+__Hspace_3 0 0 ABS 0 - -
+__Hspace_4 4010 0 ABS 0 - -
+__Hudata_bank0 0 0 ABS 0 udata_bank0 -
+__Hudata_bank1 0 0 ABS 0 udata_bank1 -
+__Hudata_bank2 0 0 ABS 0 udata_bank2 -
+__Hudata_bank3 0 0 ABS 0 udata_bank3 -
+__Hedata 0 0 ABS 0 edata -
+__Hudata 0 0 ABS 0 udata -
+__Hconfig 4012 0 CONFIG 4 config -
+__Ledata 0 0 ABS 0 edata -
+__Ludata 0 0 ABS 0 udata -
+__HCODE 366 0 ABS 0 CODE -
+__Hcode 0 0 ABS 0 code -
+__Hdata 0 0 ABS 0 data -
+__LCODE 0 0 ABS 0 CODE -
+__Lcode 0 0 ABS 0 code -
+__Ldata 0 0 ABS 0 data -
+__S0 0 0 ABS 0 - -
+__S1 7F 0 ABS 0 - -
+__S3 0 0 ABS 0 - -
+__Lconfig 0 0 CONFIG 4 config -
+__Lspace_0 0 0 ABS 0 - -
+__Lspace_1 0 0 ABS 0 - -
+__Lspace_3 0 0 ABS 0 - -
+__Lspace_4 0 0 ABS 0 - -
+__Ludata_bank0 0 0 ABS 0 udata_bank0 -
+__Ludata_bank1 0 0 ABS 0 udata_bank1 -
+__Ludata_bank2 0 0 ABS 0 udata_bank2 -
+__Ludata_bank3 0 0 ABS 0 udata_bank3 -
+__Hudata_shr 0 0 ABS 0 udata_shr -
+__Ludata_shr 0 0 ABS 0 udata_shr -
+# %SPLITSTAB Section
+# This section enumerates all the psect splits performed by the assembler.
+# The beginning of the section is indicated by %SPLITSTAB.
+# Each line is a record a particular split, where the parent psect is on
+# the left and the child on the right.  Note that a child psect is always
+# split form the top of the parent psect. All splits from a given parent
+# are listed in the order in which they occurred.
+%SPLITSTAB
+# %DABS Section
+# This section contains a table of all usuage of the assember
+# directive DABS in the program. Each line has the following format:
+#   <name> <space> <address> <size>
+# If the DABS was originally labelled then that shall be <name>,
+# otherwise name will be "-".  The <space> number is in decimal.
+# <address> and <size> are in byte units as unqaulified hexadecimal
+%DABS
+# %SEGMENTS Section
+# This sections enumerates the segments of the program.  Each segment
+# is described on a single line as follows:
+#    <name> <space> <link address> <file address> <size> <delta>
+# Addresses and size are in unqualified hexadecimal.  The link address
+# and size are in units of delta. The file address is in units of bytes.
+# All other numeric quantities are in decimal.
+%SEGMENTS
+udata_shr 1 70 70 F 1
+# %NOTES Section
+# This section contains data of all the note-psects.  The beginning of the section
+# is indicated by %NOTES. The first line indicates the name and decimal
+# byte-length of the first note-psect, e.g.
+#   $codecov_info_hdr 16
+# Each line that follows contains the byte-data of the psect in hexadecimal as a
+# space-separated list. These lines are limited to 16 bytes of data.
+%NOTES
