@@ -8,7 +8,7 @@
 ;Compilador: PIC-AS (v2.40), MPLAB X IDE (v6.00)
 ;Proyecto: Proyecto
 ;Creado: 23/08/2022
-;Última Modificación: 31/08/22
+;Última Modificación: 08/09/22
 ;*******************************************************************************
 PROCESSOR 16F887
 
@@ -2475,7 +2475,7 @@ ENDM
   CONFIG LVP = OFF ; Low Voltage Programming Enable bit (((PORTB) and 07Fh), 3/PGM pin has PGM function, low voltage programming enabled)
 
 ;CONFIG2
-  CONFIG BOR4V = BOR40V ; Brown-out Reset Selection bit (Brown-out Reset set to 4.0V)
+  CONFIG BOR4V = BOR21V ; Brown-out Reset Selection bit (Brown-out Reset set to 4.0V)
   CONFIG WRT = OFF ; Flash Program Memory Self Write Enable bits (Write protection off)
 
 
@@ -2487,7 +2487,7 @@ PSECT udata_shr
     estado: DS 1
     CDIS: DS 1
     DIS: DS 1
-    contseg: DS 1
+    cantmes: DS 1
     contlseg: DS 1
     contldec: DS 1
     contlmin: DS 1
@@ -2495,15 +2495,22 @@ PSECT udata_shr
     contlhora: DS 1
     contldechora: DS 1
     contmesu: DS 1
-    contmesud: DS 1
+    contmesd: DS 1
     contlmes: DS 1
     W_TEMP: DS 1
     STATUS_TEMP: DS 1
 
 PSECT udata_bank0
-    contldia: DS 1
     contdiau: DS 1
     contdiad: DS 1
+    feb: DS 1
+    contlsega: DS 1
+    contldeca: DS 1
+    contlmina: DS 1
+    contldecmina: DS 1
+    contlhoraa: DS 1
+    contldechoraa: DS 1
+    contled: DS 1
 
 ;*******************************************************************************
 ;Vector Reset
@@ -2522,16 +2529,16 @@ PUSH:
     MOVWF STATUS_TEMP ;MOVER EL VALOR DE STATUS (AHORA EN W) A UNA VARIABLE
 
 ISR:
-    BANKSEL TMR1L
-    MOVLW 0xDC
-    MOVWF TMR1L
+    BANKSEL TMR1L ;IR AL BANCO DONDE SE ENCUENTRA EL REGISTRO TMR1L
+    MOVLW 0xDC ;CARGAMOS VALOR DE 3036 PARA DELAY DE 1 SEGUNDO (HEXADECIMAL)
+    MOVWF TMR1L ;AL SER DE 16 BITS PRIMERO AL NIBBLES BAJOS
     MOVLW 0X0B
-    MOVWF TMR1H
+    MOVWF TMR1H ;VALOR AL NIBBLES ALTOS
 
-    BTFSC PIR1, 0 ;REVISAR EL BIT DE INTERRUPCIONES DEL Timer0
-    CALL TIMER ;IR A LA FUNCIóN DEL Timer0
-    BTFSC INTCON, 0
-    CALL PRTB
+    BTFSC PIR1, 0 ;REVISAR EL BIT DE INTERRUPCIONES DEL Timer1
+    CALL TIMER ;IR A LA FUNCIóN DEL Timer1
+    BTFSC INTCON, 0 ;REVISAR BIT DE INTERRUPCION DEL PUERTO B
+    CALL PRTB ;IR A FUNCION DEL PUERTO B
 
 POP:
     SWAPF STATUS_TEMP, W ;MOVER EL VALOR DE STATUS GUARDADO EN UNA VARIABLE A W
@@ -2541,9 +2548,50 @@ POP:
     RETFIE ;REGRESAR DE LA INTERRUPCIóN
 
 PRTB:
-    BTFSS INTCON, 0 ; ((INTCON) and 07Fh), 0 = 1 ?
-    GOTO POP
+    BTFSS INTCON, 0 ;REVISAR BIT DE INTERRUPCION DEL PUERTO B
+    GOTO POP ;SALIR DE LA INTERRUPCION SI ES 0
+    BCF INTCON, 0 ;LIMPIAR BANDERA DE INTERRUPCION
+    BTFSC estado, 0 ;SI ES ESTADO 0 Y LA ALARMA ESTA SONANDO QUE SE APAGUE
+    CALL APAGARALARMA ;IR A FUNCION DE APAGAR ALARMA
+    BTFSC estado, 4 ;REVISAR SI ES ESTADO 4
+    GOTO $+9 ;IR A BOTONES DE CONFIGURACION DE ALARMA
+    BTFSC estado, 1 ;REVISAR SI ES ESTADO 1
+    GOTO $+25 ;IR A MODO LECTURA DE HORA
+    BTFSC estado, 3 ;REVISAR SI ES ESTADO 3
+    GOTO $+14 ;IR A MODO DE CONFIGURACION DE HORA
+    BTFSC estado, 0 ;REVISAR SI ES ESTADO 0
+    GOTO $+33 ;IR A MODO LECTURA DE HORA
+    BTFSC estado, 2 ;REVISAR SI ES ESTADO 2
+    GOTO $+31 ;IR A MODO LECTURA DE FECHA
+    BTFSS PORTB, 3 ;REVISAR SI SE PRESIONO BOTON DE AUMENTO
+    CALL ANTI1 ;LLAMAR ANTIRREBOTE
+    BTFSC PORTB, 3 ;REVISAR SI SE SOLTO EL BOTON
+    CALL VERI1A ;IR A FUNCION DE AUMENTAR ALARMA
+    BTFSS PORTB, 4 ;REVISAR SI SE PRESIONO BOTON DE DECREMENTO
+    CALL ANTI2 ;IR A ANTIRREBOTE
+    BTFSC PORTB, 4 ;REVISAR SI SE SOLTO EL BOTON;
+    CALL VERI1DA ;IR A FUNCION DE DECREMENTO DE ALARMA
+    GOTO $+18 ;IR A FUNCION DE AUMENTO DE SEGUNDO, MINUTOS U HORAS
+    BTFSS PORTB, 3 ;REVISAR SI SE PRESIONO EL BOTON
+    CALL ANTI1 ;LLAMAR ANTIRREBOTE
+    BTFSC PORTB, 3 ;REVISAR SI SE PRESIONO BOTON DE AUMENTO
+    CALL VERI6 ;LLAMAR FUNCION DE AUMENTO DE MES
+    BTFSS PORTB, 4 ;
+    CALL ANTI2
+    BTFSC PORTB, 4
+    CALL VERI1DF
+    GOTO $+9
+    BTFSS PORTB, 3
+    CALL ANTI1
+    BTFSC PORTB, 3
+    CALL VERI1
+    BTFSS PORTB, 4
+    CALL ANTI2
+    BTFSC PORTB, 4
+    CALL VERI1D
     BTFSS PORTB, 5
+    CALL ANTI4
+    BTFSC PORTB, 5
     CALL REVISION1
     BTFSC estado, 0
     GOTO ESTADO0_ISR
@@ -2551,12 +2599,21 @@ PRTB:
     GOTO ESTADO1_ISR
     BTFSC estado, 2
     GOTO ESTADO2_ISR
+    BTFSC estado, 3
+    GOTO ESTADO3_ISR
+    BTFSC estado, 4
+    GOTO ESTADO4_ISR
+
+APAGARALARMA:
+    BTFSS PORTB, 7
+    BSF PORTA, 5
+    RETURN
 
 ESTADO0_ISR:
     BTFSS PORTB, 6
-    BSF estado, 1
-    BTFSS PORTB, 6
-    BCF estado, 0
+    CALL ANTI3
+    BTFSC PORTB, 6
+    CALL ES0
     BCF INTCON, 0 ; ((INTCON) and 07Fh), 0 = 0
     BSF CDIS, 0
     BCF CDIS, 1
@@ -2566,73 +2623,125 @@ ESTADO0_ISR:
     BCF CDIS, 5
     GOTO POP
 
+ES0:
+    BTFSS ban, 2
+    RETURN
+    BSF estado, 1
+    BCF estado, 0
+    CLRF ban
+    RETURN
+
+
 ESTADO1_ISR:
     BTFSS PORTB, 6
-    BSF estado, 2
-    BTFSS PORTB, 6
-    BCF estado, 1
+    CALL ANTI3
+    BTFSC PORTB, 6
+    CALL ES1
     BCF INTCON, 0 ; ((INTCON) and 07Fh), 0 = 0
     BSF DIS, 0
     GOTO POP
+
+ES1:
+    BTFSS ban, 2
+    RETURN
+    BSF estado, 2
+    BCF estado, 1
+    CLRF ban
+    RETURN
 
 ESTADO2_ISR:
     BTFSS PORTB, 6
-    BSF estado, 0
-    BTFSS PORTB, 6
+    CALL ANTI3
+    BTFSC PORTB, 6
+    CALL ES2
+    BCF INTCON, 0 ; ((INTCON) and 07Fh), 0 = 0
+    BSF CDIS, 0
+    BCF CDIS, 1
+    BCF CDIS, 2
+    BCF CDIS, 3
+    BCF CDIS, 4
+    BCF CDIS, 5
+    GOTO POP
+
+ES2:
+    BTFSS ban, 2
+    RETURN
+    BSF estado, 3
     BCF estado, 2
+    CLRF ban
+    RETURN
+
+ESTADO3_ISR:
+    BTFSS PORTB, 6
+    CALL ANTI3
+    BTFSC PORTB, 6
+    CALL ES3
     BCF INTCON, 0 ; ((INTCON) and 07Fh), 0 = 0
     BSF DIS, 0
     GOTO POP
 
+ES3:
+    BTFSS ban, 2
+    RETURN
+    BSF estado, 4
+    BCF estado, 3
+    CLRF ban
+    RETURN
+
+ESTADO4_ISR:
+    BTFSS PORTB, 6
+    CALL ANTI3
+    BTFSC PORTB, 6
+    CALL ES4
+    BCF INTCON, 0 ; ((INTCON) and 07Fh), 0 = 0
+    BSF DIS, 0
+    GOTO POP
+
+ES4:
+    BTFSS ban, 2
+    RETURN
+    BSF estado, 0
+    BCF estado, 4
+    CLRF ban
+    RETURN
+
 REVISION1:
+    BTFSS ban, 3
+    RETURN
     BTFSC CDIS, 0
     GOTO CDIS0ISR
     BTFSC CDIS, 1
     GOTO CDIS1ISR
     BTFSC CDIS, 2
     GOTO CDIS2ISR
-    BTFSC CDIS, 3
-    GOTO CDIS3ISR
-    BTFSC CDIS, 4
-    GOTO CDIS4ISR
-    BTFSC CDIS, 5
-    GOTO CDIS5ISR
     GOTO POP
 
 CDIS0ISR:
     BCF CDIS, 0
     BSF CDIS, 1
     BCF INTCON, 0
+    CLRF ban
     RETURN
 
 CDIS1ISR:
     BCF CDIS, 1
     BSF CDIS, 2
     BCF INTCON, 0
+    BTFSC estado, 3
+    CALL MES
+    CLRF ban
+    RETURN
+
+MES:
+    BSF CDIS, 0
+    BCF CDIS, 1
     RETURN
 
 CDIS2ISR:
     BCF CDIS, 2
-    BSF CDIS, 3
-    BCF INTCON, 0
-    RETURN
-
-CDIS3ISR:
-    BCF CDIS, 3
-    BSF CDIS, 4
-    BCF INTCON, 0
-    RETURN
-
-CDIS4ISR:
-    BCF CDIS, 4
-    BSF CDIS, 5
-    BCF INTCON, 0
-    RETURN
-
-CDIS5ISR:
-    BCF CDIS, 5
     BSF CDIS, 0
     BCF INTCON, 0
+    CLRF ban
     RETURN
 
 TIMER:
@@ -2645,18 +2754,28 @@ TIMER:
     GOTO VERI1
 
 VERI1:
+    BCF INTCON, 0
+    BTFSS estado, 1
+    GOTO $+7
+    BTFSS CDIS, 0
+    GOTO VERI3
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    GOTO $+3
     BTFSS estado, 0
     RETURN
     INCF contlseg, F ;INCREMENTAR CONTADOR DE UNIDADES DE SEGUNDO
+    BCF INTCON, 0
     MOVF contlseg, W ;MOVER EL VALOR DEL CONTADOR A W
     SUBLW 10 ;RESTAR 10 DE W
     BTFSS STATUS, 2 ;REVISAR SI LA RESTA ES 0
     RETURN ;SI LA RESTA NO ES 0, RETORNAR
     CLRF contlseg ;SI ES 0, REINCIAR EL CONTADOR
-    BANKSEL TMR1L
     GOTO VERI2
 
 VERI2:
+    BCF INTCON, 0
     INCF contldec, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
     MOVF contldec, W ;MOVER EL VALOR DEL CONTADOR A W
     SUBLW 6 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
@@ -2664,9 +2783,22 @@ VERI2:
     RETURN ;SI NO ES 0, RETORNAMOS
     CLRF contlseg ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
     CLRF contldec ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    BTFSC estado, 1
+    RETURN
     GOTO VERI3
 
 VERI3:
+    BCF INTCON, 0
+    BTFSS estado, 1
+    GOTO $+7
+    BTFSS CDIS, 1
+    GOTO VERI5
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    GOTO $+3
+    BTFSS estado, 0
+    RETURN
     INCF contlmin, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
     MOVF contlmin, W ;MOVER EL VALOR DEL CONTADOR A W
     SUBLW 10 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
@@ -2687,45 +2819,16 @@ VERI4:
     CLRF contlmin
     CLRF contlseg ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
     CLRF contldec ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    BTFSC estado, 1
+    RETURN
     GOTO VERI5
 
-VERI5:
-    INCF contlhora, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
-    MOVF contldechora, W ;MOVER EL VALOR DEL CONTADOR A W
-    SUBLW 2 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
-    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
-    GOTO $+4 ;SI NO ES 0, RETORNAMOS
-    MOVF contlhora, W
-    SUBLW 4
-    BTFSS STATUS, 2
-    GOTO $+8
-    CLRF contldechora
-    CLRF contlhora
-    CLRF contldecmin
-    CLRF contlmin
-    CLRF contlseg ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
-    CLRF contldec ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
-    GOTO VERI6
-    MOVF contlhora, W ;MOVER EL VALOR DEL CONTADOR A W
-    SUBLW 10 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
-    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
-    RETURN ;SI NO ES 0, RETORNAMOS
-    INCF contldechora
-    CLRF contlhora
-    CLRF contldecmin
-    CLRF contlmin
-    CLRF contlseg ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
-    CLRF contldec ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
-    RETURN
 
-VERI6:
-
-    RETURN
 ;*******************************************************************************
 ;Código Principal
 ;*******************************************************************************
 PSECT CODE, delta=2, abs
- ORG 0x0100
+ ORG 0x0150
 
 tabla: ;TABLA DE VALORES PARA DISPLAY
     CLRF PCLATH
@@ -2749,30 +2852,7 @@ tabla: ;TABLA DE VALORES PARA DISPLAY
     RETLW 01111001B;E
     RETLW 01110001B;F
 
-table: ;TABLA DE VALORES PARA DISPLAY
-    CLRF PCLATH
-    BSF PCLATH, 0
-    ANDLW 0x0F ;SE PONE UN LíMITE DE 15
-    ADDWF PCL ;SUMA ENTRE PCL Y W
-    RETLW 10111111B;0
-    RETLW 10000110B;1
-    RETLW 11011011B;2
-    RETLW 11001111B;3
-    RETLW 11100110B;4
-    RETLW 11101101B;5
-    RETLW 11111101B;6
-    RETLW 10000111B;7
-    RETLW 11111111B;8
-    RETLW 11100111B;9
-    RETLW 11110111B;A
-    RETLW 11111100B;B
-    RETLW 10111001B;C
-    RETLW 11011110B;D
-    RETLW 11111001B;E
-    RETLW 11110001B;F
-
 main:
-    global estado, DIS, CDIS
     BANKSEL ANSEL ;PONER PUERTOS COMO DIGITALES
     CLRF ANSEL
     CLRF ANSELH
@@ -2793,25 +2873,42 @@ main:
     BSF TRISB, 4
     BSF TRISB, 5
     BSF TRISB, 6 ;((PORTB) and 07Fh), 7 COMO ENTRADA
+    BSF TRISB, 7
 
     BANKSEL PORTA ;LIMPIAR PUERTOS, PARA INICIARLOS VACIOS
-    CLRF PORTA
+    MOVLW 00100000B
+    MOVWF PORTA
     CLRF PORTB
     CLRF PORTC
     CLRF PORTD
-    CLRF PORTE
+    BSF PORTE, 0
+
+    MOVLW 1
+    MOVWF contdiau
+    CLRF contdiad
+    CLRF feb
+    CLRF contlsega
+    CLRF contldeca
+    CLRF contlmina
+    CLRF contldecmina
+    CLRF contlhoraa
+    CLRF contled
+    MOVLW 1
+    MOVWF contldechoraa
 
     BANKSEL WPUB ;DETERMINAR PINES QUE VAN A LLEVAR PULL-UPS
     BSF WPUB, 3
     BSF WPUB, 4
     BSF WPUB, 5
     BSF WPUB, 6 ;SI PULL-UP
+    BSF WPUB, 7
 
     BANKSEL IOCB ;DETERMINAR PINES QUE VAN A LLEVAR INTERRUPCIóN ON-CHANGE
-    BCF IOCB, 3
-    BCF IOCB, 4
+    BSF IOCB, 3
+    BSF IOCB, 4
     BSF IOCB, 5
     BSF IOCB, 6 ;SI INTERRUPCIóN
+    BSF IOCB, 7
 
     BANKSEL INTCON ;ACTIVAR INTERRUPCIONES
     BSF INTCON, 7 ;ACRIVAR BIT DE INTERRUPCIONES GLOBALES
@@ -2821,6 +2918,7 @@ main:
 
     BANKSEL PIE1
     BSF PIE1, 0
+    BCF PIE1, 1
 
     BANKSEL PIR1
     BCF PIR1, 0
@@ -2830,6 +2928,15 @@ main:
     BCF T1CON, 4
     BCF T1CON, 1
     BSF T1CON, 0
+
+    BANKSEL T2CON
+    BCF T2CON, 6
+    BSF T2CON, 5
+    BCF T2CON, 4
+    BCF T2CON, 3
+    BSF T2CON, 2
+    BCF T2CON, 1
+    BCF T2CON, 0
 
     BANKSEL TMR1L
     MOVLW 0xDC
@@ -2852,34 +2959,60 @@ main:
     BSF OPTION_REG, 1
     BSF OPTION_REG, 0
 
-    MOVLW 1
+    MOVLW 0x01
     MOVWF contmesu
-    CLRF contseg ;LIMPIAR VARIBLE DE DECENAS DE SEGUNDOS PARA QUE INICIE EN 0
+    MOVWF contlmes
+    CLRF cantmes
     CLRF contlseg ;LIMPIAR VARIBLE DE UNIDADES DE SEGUNDOS PARA QUE INICIE EN 0
     CLRF contldec ;LIMPIAR VARIBLE DE CONTADOR PARA DELAY DE 1s PARA QUE INICIE EN 0
     CLRF contlmin
     CLRF contldecmin
     CLRF contlhora
     CLRF contldechora
-    BSF estado, 0
+    CLRF contmesd
+    MOVLW 0x01
+    MOVWF estado
+    MOVWF DIS
+    MOVWF CDIS
     CLRF ban
-    BSF DIS, 0
-    CLRF CDIS
+
+    BANKSEL TMR2 ;IR AL BANCO DEL TIMER 0
+    MOVLW 200 ;MOVER VALOR PARA DELAY DE 20ms a W
+    MOVWF TMR2 ;PONER EL VALOR PARA DELAY DE 20ms EN EL Timer0
+
     BANKSEL TMR0 ;IR AL BANCO DEL TIMER 0
-    MOVLW 207 ;MOVER VALOR PARA DELAY DE 20ms a W
+    MOVLW 253 ;MOVER VALOR PARA DELAY DE 20ms a W
     MOVWF TMR0 ;PONER EL VALOR PARA DELAY DE 20ms EN EL Timer0
 
 LOOP:
+    BTFSC PORTE, 0
+    CALL LEDS
+    CALL LEDS2
     BTFSC estado, 0
     GOTO HORA
     BTFSC estado, 1
     GOTO CONFIGHORA
     BTFSC estado, 2
     GOTO FECHA
-    ;BTFSC estado, 3
-    ;GOTO CONFIGFECHA
+    BTFSC estado, 3
+    GOTO CONFIGFECHA
+    BTFSC estado, 4
+    GOTO ALARMA
+
 
 HORA:
+    BTFSC PORTA, 5
+    GOTO $+4
+    GOTO $+1
+    MOVLW 00000001B
+    GOTO $+2
+    MOVLW 00100001B
+    MOVWF PORTA
+    CALL CHECK
+    BCF TRISB, 3
+    BCF TRISB, 4
+    BCF IOCB, 4
+    BCF IOCB, 3
     BSF INTCON, 6
     BTFSC DIS, 0
     GOTO DIS0
@@ -2895,6 +3028,12 @@ HORA:
     GOTO DIS5
 
 CONFIGHORA:
+    MOVLW 00100010B
+    MOVWF PORTA
+    BSF TRISB, 3
+    BSF TRISB, 4
+    BSF IOCB, 3
+    BSF IOCB, 4
     BCF INTCON, 6
     BTFSC DIS, 0
     GOTO DIS0
@@ -2910,9 +3049,13 @@ CONFIGHORA:
     GOTO DIS5
 
 FECHA:
+    MOVLW 00100100B
+    MOVWF PORTA
+    BCF TRISB, 3
+    BCF TRISB, 4
+    BCF IOCB, 4
+    BCF IOCB, 3
     BSF INTCON, 6
-    BCF TRISD, 5
-    BCF TRISD, 6
     BTFSC DIS, 0
     GOTO DIS0
     BTFSC DIS, 1
@@ -2926,6 +3069,79 @@ FECHA:
     BTFSC DIS, 5
     GOTO DIS5
 
+CONFIGFECHA:
+    MOVLW 00101000B
+    MOVWF PORTA
+    BSF TRISB, 3
+    BSF TRISB, 4
+    BSF IOCB, 3
+    BSF IOCB, 4
+    BCF INTCON, 6
+    BTFSC DIS, 0
+    GOTO DIS0
+    BTFSC DIS, 1
+    GOTO DIS1
+    BTFSC DIS, 2
+    GOTO DIS2
+    BTFSC DIS, 3
+    GOTO DIS3
+    BTFSC DIS, 4
+    GOTO DIS4
+    BTFSC DIS, 5
+    GOTO DIS5
+
+ALARMA:
+    MOVLW 00110000B
+    MOVWF PORTA
+    BSF PORTA, 4
+    BSF TRISB, 3
+    BSF TRISB, 4
+    BSF IOCB, 3
+    BSF IOCB, 4
+    BCF INTCON, 6
+    BTFSC DIS, 0
+    GOTO DIS0
+    BTFSC DIS, 1
+    GOTO DIS1
+    BTFSC DIS, 2
+    GOTO DIS2
+    BTFSC DIS, 3
+    GOTO DIS3
+    BTFSC DIS, 4
+    GOTO DIS4
+    BTFSC DIS, 5
+    GOTO DIS5
+
+CHECK:
+    MOVF contlseg, W
+    SUBWF contlsega, W
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contldec, W
+    SUBWF contldeca, W
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contlmin, W
+    SUBWF contlmina, W
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contldecmin, W
+    SUBWF contldecmina, W
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contlhora, W
+    SUBWF contlhoraa, W
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contldechora, W
+    SUBWF contldechoraa, W
+    BTFSS STATUS, 2
+    RETURN
+    BCF PORTA, 5
+    RETURN
+
+
+
 DIS0:
     BSF TRISD, 0
     BCF TRISD, 1
@@ -2934,21 +3150,17 @@ DIS0:
     BCF TRISD, 4
     BCF TRISD, 5
 
-    BTFSS estado, 2
-    GOTO $+10
-    MOVF contmesu, W
-    PAGESEL tabla
-    CALL tabla
-    PAGESEL DIS0
-    MOVWF PORTC
-    MOVWF PORTC
-    BSF DIS, 1
-    BCF DIS, 0
-    GOTO VERIFICACION
-    BTFSS estado, 1
+    BTFSC estado, 4
+    GOTO $+8
+    BTFSS estado, 3
+    GOTO $+2
     GOTO $+3
-    BTFSC CDIS, 0
-    CALL CON0
+    BTFSS estado, 2
+    GOTO $+5
+    MOVLW 2
+    GOTO $+4
+    MOVF contlsega, W
+    GOTO $+2
     MOVF contlseg, W
     PAGESEL tabla
     CALL tabla
@@ -2966,10 +3178,17 @@ DIS1:
     BCF TRISD, 4
     BCF TRISD, 5
 
-    BTFSS estado, 1
+    BTFSC estado, 4
+    GOTO $+8
+    BTFSS estado, 3
+    GOTO $+2
     GOTO $+3
-    BTFSC CDIS, 1
-    CALL CON1
+    BTFSS estado, 2
+    GOTO $+5
+    MOVLW 2
+    GOTO $+4
+    MOVF contldeca, W
+    GOTO $+2
     MOVF contldec, W
     PAGESEL tabla
     CALL tabla
@@ -2987,10 +3206,17 @@ DIS2:
     BCF TRISD, 4
     BCF TRISD, 5
 
-    BTFSS estado, 1
+    BTFSC estado, 4
+    GOTO $+8
+    BTFSS estado, 3
+    GOTO $+2
     GOTO $+3
-    BTFSC CDIS, 2
-    CALL CON2
+    BTFSS estado, 2
+    GOTO $+5
+    MOVF contmesu, W
+    GOTO $+4
+    MOVF contlmina, W
+    GOTO $+2
     MOVF contlmin, W
     PAGESEL tabla
     CALL tabla
@@ -3008,10 +3234,17 @@ DIS3:
     BCF TRISD, 4
     BCF TRISD, 5
 
-    BTFSS estado, 1
+    BTFSC estado, 4
+    GOTO $+8
+    BTFSS estado, 3
+    GOTO $+2
     GOTO $+3
-    BTFSC CDIS, 3
-    CALL CON3
+    BTFSS estado, 2
+    GOTO $+5
+    MOVF contmesd, W
+    GOTO $+4
+    MOVF contldecmina, W
+    GOTO $+2
     MOVF contldecmin, W
     PAGESEL tabla
     CALL tabla
@@ -3029,10 +3262,17 @@ DIS4:
     BSF TRISD, 4
     BCF TRISD, 5
 
-    BTFSS estado, 1
+    BTFSC estado, 4
+    GOTO $+8
+    BTFSS estado, 3
+    GOTO $+2
     GOTO $+3
-    BTFSC CDIS, 4
-    CALL CON4
+    BTFSS estado, 2
+    GOTO $+5
+    MOVF contdiau, W
+    GOTO $+4
+    MOVF contlhoraa, W
+    GOTO $+2
     MOVF contlhora, W
     PAGESEL tabla
     CALL tabla
@@ -3050,10 +3290,17 @@ DIS5:
     BCF TRISD, 4
     BSF TRISD, 5
 
-    BTFSS estado, 1
+    BTFSC estado, 4
+    GOTO $+8
+    BTFSS estado, 3
+    GOTO $+2
     GOTO $+3
-    BTFSC CDIS, 5
-    CALL CON5
+    BTFSS estado, 2
+    GOTO $+5
+    MOVF contdiad, W
+    GOTO $+4
+    MOVF contldechoraa, W
+    GOTO $+2
     MOVF contldechora, W
     PAGESEL tabla
     CALL tabla
@@ -3068,7 +3315,7 @@ VERIFICACION:
     GOTO VERIFICACION
     BCF INTCON, 2
     BANKSEL TMR0 ;IR AL BANCO DEL TIMER 0
-    MOVLW 207 ;MOVER VALOR PARA DELAY DE 20ms a W
+    MOVLW 253 ;MOVER VALOR PARA DELAY DE 20ms a W
     MOVWF TMR0 ;PONER EL VALOR PARA DELAY DE 20ms EN EL Timer0
     GOTO LOOP
 
@@ -3076,268 +3323,325 @@ VERIFICACION:
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-CON0:
-    BTFSS PORTB, 3
-    CALL ANTI1
-    BTFSC PORTB, 3
-    CALL IN0
-    BTFSS PORTB, 4
-    CALL ANTI2
-    BTFSC PORTB, 4
-    CALL DC0
+VERI1D:
+    BCF INTCON, 0
+    BTFSS estado, 1
     RETURN
-
-CON1:
-    BTFSS PORTB, 3
-    CALL ANTI1
-    BTFSC PORTB, 3
-    CALL IN1
-    BTFSS PORTB, 4
-    CALL ANTI2
-    BTFSC PORTB, 4
-    CALL DC1
-    RETURN
-
-CON2:
-    BTFSS PORTB, 3
-    CALL ANTI1
-    BTFSC PORTB, 3
-    CALL IN2
-    BTFSS PORTB, 4
-    CALL ANTI2
-    BTFSC PORTB, 4
-    CALL DC2
-    RETURN
-
-CON3:
-    BTFSS PORTB, 3
-    CALL ANTI1
-    BTFSC PORTB, 3
-    CALL IN3
-    BTFSS PORTB, 4
-    CALL ANTI2
-    BTFSC PORTB, 4
-    CALL DC3
-    RETURN
-
-CON4:
-    BTFSS PORTB, 3
-    CALL ANTI1
-    BTFSC PORTB, 3
-    CALL IN4
-    BTFSS PORTB, 4
-    CALL ANTI2
-    BTFSC PORTB, 4
-    CALL DC4
-    RETURN
-
-CON5:
-    BTFSS PORTB, 3
-    CALL ANTI1
-    BTFSC PORTB, 3
-    CALL IN5
-    BTFSS PORTB, 4
-    CALL ANTI2
-    BTFSC PORTB, 4
-    CALL DC5
-    RETURN
-
-IN0:
-    BTFSS ban, 0
-    RETURN
-    INCF contlseg
-    CALL LIMO0
-    CLRF ban
-    RETURN
-DC0:
+    BTFSS CDIS, 0
+    GOTO VERI3D
     BTFSS ban, 1
     RETURN
-    DECF contlseg
-    CALL LIMU0
     CLRF ban
-    RETURN
-
-IN1:
-    BTFSS ban, 0
-    RETURN
-    INCF contldec
-    CALL LIMO1
-    CLRF ban
-    RETURN
-DC1:
-    BTFSS ban, 1
-    RETURN
-    DECF contldec
-    CALL LIMU1
-    CLRF ban
-    RETURN
-
-IN2:
-    BTFSS ban, 0
-    RETURN
-    INCF contlmin
-    CALL LIMO2
-    CLRF ban
-    RETURN
-DC2:
-    BTFSS ban, 1
-    RETURN
-    DECF contlmin
-    CALL LIMU2
-    CLRF ban
-    RETURN
-
-IN3:
-    BTFSS ban, 0
-    RETURN
-    INCF contldecmin
-    CALL LIMO3
-    CLRF ban
-    RETURN
-DC3:
-    BTFSS ban, 1
-    RETURN
-    DECF contldecmin
-    CALL LIMU3
-    CLRF ban
-    RETURN
-
-IN4:
-    BTFSS ban, 0
-    RETURN
-    INCF contlhora
-    CALL LIMO4
-    CLRF ban
-    RETURN
-DC4:
-    BTFSS ban, 1
-    RETURN
-    DECF contlhora
-    CALL LIMU4
-    CLRF ban
-    RETURN
-
-IN5:
-    BTFSS ban, 0
-    RETURN
-    INCF contldechora
-    CALL LIMO5
-    CLRF ban
-    RETURN
-DC5:
-    BTFSS ban, 1
-    RETURN
-    DECF contldechora
-    CALL LIMU5
-    CLRF ban
-    RETURN
-
-LIMO0:
-    MOVF contlseg, W
-    SUBLW 10
-    BTFSS STATUS, 2
-    RETURN
-    CLRF contlseg
-    RETURN
-
-LIMU0:
-    MOVF contlseg, W
-    ANDLW 15
-    SUBLW 15
+    DECF contlseg, F ;INCREMENTAR CONTADOR DE UNIDADES DE SEGUNDO
+    MOVF contlseg, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255
     BTFSS STATUS, 2
     RETURN
     MOVLW 9
     MOVWF contlseg
-    RETURN
+    GOTO VERI2D
 
-LIMO1:
-    MOVF contldec, W
-    SUBLW 6
-    BTFSS STATUS, 2
-    RETURN
-    CLRF contldec
-    RETURN
-
-LIMU1:
-    MOVF contldec, W
-    ANDLW 15
-    SUBLW 15
+VERI2D:
+    BCF INTCON, 0
+    DECF contldec, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldec, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255
     BTFSS STATUS, 2
     RETURN
     MOVLW 5
     MOVWF contldec
     RETURN
 
-LIMO2:
-    MOVF contlmin, W
-    SUBLW 10
-    BTFSS STATUS, 2
+VERI3D:
+    BCF INTCON, 0
+    BTFSS estado, 1
     RETURN
-    CLRF contlmin
+    BTFSS CDIS, 1
+    GOTO VERI5D
+    BTFSS ban, 1
     RETURN
-
-LIMU2:
-    MOVF contlmin, W
-    ANDLW 15
-    SUBLW 15
-    BTFSS STATUS, 2
-    RETURN
+    CLRF ban
+    DECF contlmin, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contlmin, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
     MOVLW 9
     MOVWF contlmin
-    RETURN
+    GOTO VERI4D
 
-LIMO3:
-    MOVF contldecmin, W
-    SUBLW 6
-    BTFSS STATUS, 2
-    RETURN
-    CLRF contldecmin
-    RETURN
-
-LIMU3:
-    MOVF contldecmin, W
-    ANDLW 15
-    SUBLW 15
-    BTFSS STATUS, 2
-    RETURN
+VERI4D:
+    DECF contldecmin, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldecmin, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
     MOVLW 5
     MOVWF contldecmin
     RETURN
 
-LIMO4:
+VERI5D:
+    BCF INTCON, 0
+    BTFSS estado, 1
+    RETURN
+    BTFSS CDIS, 2
+    RETURN
+    BTFSS ban, 1
+    RETURN
+    CLRF ban
+    DECF contlhora, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldechora, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 0 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    GOTO $+4 ;SI NO ES 0, RETORNAMOS
     MOVF contlhora, W
-    SUBLW 10
+    SUBLW 255
     BTFSS STATUS, 2
+    GOTO $+6
+    MOVLW 2
+    MOVWF contldechora
+    MOVLW 3
+    MOVWF contlhora
     RETURN
-    CLRF contlhora
-    RETURN
-
-LIMU4:
-    MOVF contlhora, W
-    ANDLW 15
-    SUBLW 15
-    BTFSS STATUS, 2
-    RETURN
+    MOVF contlhora, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    DECF contldechora
     MOVLW 9
     MOVWF contlhora
     RETURN
 
-LIMO5:
-    MOVF contldechora, W
-    SUBLW 3
-    BTFSS STATUS, 2
+VERI5:
+    BCF INTCON, 0
+    BTFSS estado, 1
+    GOTO $+7
+    BTFSS CDIS, 2
     RETURN
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    GOTO $+3
+    BTFSS estado, 0
+    RETURN
+    INCF contlhora, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldechora, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 2 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    GOTO $+4 ;SI NO ES 0, RETORNAMOS
+    MOVF contlhora, W
+    SUBLW 4
+    BTFSS STATUS, 2
+    GOTO $+8
     CLRF contldechora
+    CLRF contlhora
+    CLRF contldecmin
+    CLRF contlmin
+    CLRF contlseg ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldec ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    GOTO VERI6
+    MOVF contlhora, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 10 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    INCF contldechora
+    CLRF contlhora
+    BTFSC CDIS, 2
+    RETURN
+    CLRF contldecmin
+    CLRF contlmin
+    CLRF contlseg ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldec ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
     RETURN
 
-LIMU5:
-    MOVF contldechora, W
-    ANDLW 15
-    SUBLW 15
+VERI6:
+    BCF INTCON, 0
+    BTFSS estado, 3
+    GOTO $+6
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    BTFSC CDIS, 0
+    GOTO CHEQUEOCAMBIOMES
+    INCF contdiau, F
+    CALL CHEQUEO
+    BTFSC feb, 0
+    GOTO $+47
+    BTFSS cantmes, 0
+    GOTO $+23
+    MOVF contdiad, W
+    SUBLW 3
+    BTFSS STATUS, 2
+    GOTO $+12
+    MOVF contdiau, W
+    SUBLW 2
+    BTFSS STATUS, 2
+    GOTO $+8
+    INCF contmesu, F
+    INCF contlmes, F
+    CALL MES2
+    MOVLW 1
+    MOVWF contdiau
+    CLRF contdiad
+    CLRF cantmes
+    MOVF contdiau, W
+    SUBLW 10
     BTFSS STATUS, 2
     RETURN
+    CLRF contdiau
+    INCF contdiad
+    RETURN
+    MOVF contdiad, W;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    SUBLW 3
+    BTFSS STATUS, 2
+    GOTO $+12
+    MOVF contdiau, W
+    SUBLW 1
+    BTFSS STATUS, 2
+    GOTO $+8
+    INCF contmesu, F
+    INCF contlmes, F
+    CALL RESETMES
+    MOVLW 1
+    MOVWF contdiau
+    CLRF contdiad
+    CLRF cantmes
+    MOVF contdiau, W
+    SUBLW 10
+    BTFSS STATUS, 2
+    RETURN
+    CLRF contdiau
+    INCF contdiad, F
+    RETURN
+    MOVF contdiad, W ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    SUBLW 2
+    BTFSS STATUS, 2
+    GOTO $+12
+    MOVF contdiau, W
+    SUBLW 9
+    BTFSS STATUS, 2
+    GOTO $+8
+    INCF contmesu, F
+    INCF contlmes, F
+    MOVLW 1
+    MOVWF contdiau
+    CLRF contdiad
+    CLRF cantmes
+    CLRF feb
+    MOVF contdiau, W
+    SUBLW 10
+    BTFSS STATUS, 2
+    RETURN
+    CLRF contdiau
+    INCF contdiad, F
+    RETURN
+
+VERI1DF:
+    BCF INTCON, 0
+    BTFSS estado, 3
+    GOTO $+6
+    BTFSS ban, 1
+    RETURN
+    CLRF ban
+    BTFSC CDIS, 0
+    GOTO CHEQUEOCAMBIOMES2
+    DECF contdiau, F
+    CALL CHEQUEO3
+    BTFSC feb, 0
+    GOTO $+51
+    BTFSS cantmes, 0
+    GOTO $+25
+    MOVF contdiad, W
+    SUBLW 0
+    BTFSS STATUS, 2
+    GOTO $+13
+    MOVF contdiau, W
+    SUBLW 0
+    BTFSS STATUS, 2
+    GOTO $+9
+    DECF contmesu, F
+    DECF contlmes, F
+    CALL MES3
+    MOVLW 1
+    MOVWF contdiau
+    MOVLW 3
+    MOVWF contdiad
+    CLRF cantmes
+    MOVF contdiau, W
+    SUBLW 255
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 9
+    MOVWF contdiau
+    DECF contdiad
+    RETURN
+    MOVF contdiad, W;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    SUBLW 0
+    BTFSS STATUS, 2
+    GOTO $+13
+    MOVF contdiau, W
+    SUBLW 0
+    BTFSS STATUS, 2
+    GOTO $+9
+    DECF contmesu, F
+    DECF contlmes, F
+    CALL RESETMES2
+    MOVLW 0
+    MOVWF contdiau
+    MOVLW 3
+    MOVWF contdiad
+    CLRF cantmes
+    MOVF contdiau, W
+    SUBLW 255
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 9
+    MOVWF contdiau
+    DECF contdiad, F
+    RETURN
+    MOVF contdiad, W ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    SUBLW 0
+    BTFSS STATUS, 2
+    GOTO $+13
+    MOVF contdiau, W
+    SUBLW 0
+    BTFSS STATUS, 2
+    GOTO $+9
+    DECF contmesu, F
+    DECF contlmes, F
+    MOVLW 8
+    MOVWF contdiau
     MOVLW 2
-    MOVWF contldechora
+    MOVWF contdiad
+    CLRF cantmes
+    CLRF feb
+    MOVF contdiau, W
+    SUBLW 255
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 9
+    MOVWF contdiau
+    DECF contdiad, F
+    RETURN
+
+CHEQUEOCAMBIOMES:
+    MOVLW 1
+    MOVWF contdiau
+    CLRF contdiad
+    INCF contlmes
+    INCF contmesu
+    CALL MES2
+    CALL RESETMES
+    RETURN
+
+CHEQUEOCAMBIOMES2:
+    MOVLW 1
+    MOVWF contdiau
+    CLRF contdiad
+    DECF contlmes
+    DECF contmesu
+    CALL MES3
+    CALL RESETMES2
     RETURN
 
 ANTI1:
@@ -3346,6 +3650,410 @@ ANTI1:
 
 ANTI2:
     BSF ban, 1
+    RETURN
+
+ANTI3:
+    BSF ban, 2
+    RETURN
+
+ANTI4:
+    BSF ban, 3
+    RETURN
+
+CHEQUEO:
+    MOVF contlmes, W
+    SUBLW 1
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 3
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 4
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 5
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 6
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 7
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 8
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 9
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 10
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 11
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 12
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 2
+    BTFSC STATUS, 2
+    CALL CHEQUEO2
+    RETURN
+
+CHEQUEO2:
+    CLRF cantmes
+    BSF feb, 0
+    RETURN
+
+CHEQUEO3:
+    MOVF contlmes, W
+    SUBLW 1
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 2
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 4
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 5
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 6
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 7
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 8
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 9
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 10
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 11
+    BTFSC STATUS, 2
+    BSF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 12
+    BTFSC STATUS, 2
+    BCF cantmes, 0
+    MOVF contlmes, W
+    SUBLW 3
+    BTFSC STATUS, 2
+    CALL CHEQUEO4
+    RETURN
+
+CHEQUEO4:
+    CLRF cantmes
+    BSF feb, 0
+    RETURN
+
+RESETMES:
+    MOVF contmesu, W
+    SUBLW 10
+    BTFSS STATUS, 2
+    RETURN
+    CLRF contmesu
+    INCF contmesd, F
+    RETURN
+
+RESETMES2:
+    MOVF contmesu, W
+    SUBLW 255
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 9
+    MOVWF contmesu
+    DECF contmesd, F
+    RETURN
+
+MES2:
+    MOVF contmesd, W
+    SUBLW 1
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contmesu, W
+    SUBLW 3
+    BTFSS STATUS, 2
+    RETURN
+    CLRF contmesd
+    MOVLW 1
+    MOVWF contmesu
+    MOVWF contlmes
+    RETURN
+
+MES3:
+    MOVF contmesd, W
+    SUBLW 0
+    BTFSS STATUS, 2
+    RETURN
+    MOVF contmesu, W
+    SUBLW 0
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 1
+    MOVWF contmesd
+    MOVLW 2
+    MOVWF contmesu
+    MOVLW 12
+    MOVWF contlmes
+    RETURN
+
+VERI1A:
+    BCF INTCON, 0
+    BTFSS estado, 4
+    GOTO $+7
+    BTFSS CDIS, 0
+    GOTO VERI3A
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    GOTO $+3
+    BTFSS estado, 0
+    RETURN
+    INCF contlsega, F ;INCREMENTAR CONTADOR DE UNIDADES DE SEGUNDO
+    BCF INTCON, 0
+    MOVF contlsega, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 10 ;RESTAR 10 DE W
+    BTFSS STATUS, 2 ;REVISAR SI LA RESTA ES 0
+    RETURN ;SI LA RESTA NO ES 0, RETORNAR
+    CLRF contlsega ;SI ES 0, REINCIAR EL CONTADOR
+    GOTO VERI2A
+
+VERI2A:
+    BCF INTCON, 0
+    INCF contldeca, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldeca, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 6 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    CLRF contlsega ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldeca ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    BTFSC estado, 4
+    RETURN
+    GOTO VERI3A
+
+VERI3A:
+    BCF INTCON, 0
+    BTFSS estado, 4
+    GOTO $+7
+    BTFSS CDIS, 1
+    GOTO VERI5A
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    GOTO $+3
+    BTFSS estado, 0
+    RETURN
+    INCF contlmina, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contlmina, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 10 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    CLRF contlmina ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldeca ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    CLRF contlsega
+    GOTO VERI4A
+
+VERI4A:
+    INCF contldecmina, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldecmina, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 6 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    CLRF contldecmina
+    CLRF contlmina
+    CLRF contlsega ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldeca ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    BTFSC estado, 4
+    RETURN
+    GOTO VERI5A
+
+VERI5A:
+    BCF INTCON, 0
+    BTFSS estado, 4
+    GOTO $+7
+    BTFSS CDIS, 2
+    RETURN
+    BTFSS ban, 0
+    RETURN
+    CLRF ban
+    GOTO $+3
+    BTFSS estado, 0
+    RETURN
+    INCF contlhoraa, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldechoraa, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 2 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    GOTO $+4 ;SI NO ES 0, RETORNAMOS
+    MOVF contlhoraa, W
+    SUBLW 4
+    BTFSS STATUS, 2
+    GOTO $+8
+    CLRF contldechoraa
+    CLRF contlhoraa
+    CLRF contldecmina
+    CLRF contlmina
+    CLRF contlsega ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldeca ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    RETURN
+    MOVF contlhoraa, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 10 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    INCF contldechoraa
+    CLRF contlhoraa
+    BTFSC CDIS, 2
+    RETURN
+    CLRF contldecmina
+    CLRF contlmina
+    CLRF contlsega ;SI ES 0 LIMPIAR EL CONTADOR DE UNIDADES DE SEGUNDOS
+    CLRF contldeca ;SI ES 0 LIMPIAR EL CONTADOR DE DECENAS DE SEGUNDOS
+    RETURN
+
+VERI1DA:
+    BCF INTCON, 0
+    BTFSS estado, 4
+    RETURN
+    BTFSS CDIS, 0
+    GOTO VERI3DA
+    BTFSS ban, 1
+    RETURN
+    CLRF ban
+    DECF contlsega, F ;INCREMENTAR CONTADOR DE UNIDADES DE SEGUNDO
+    MOVF contlsega, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 9
+    MOVWF contlsega
+    GOTO VERI2DA
+
+VERI2DA:
+    BCF INTCON, 0
+    DECF contldeca, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldeca, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255
+    BTFSS STATUS, 2
+    RETURN
+    MOVLW 5
+    MOVWF contldeca
+    RETURN
+
+VERI3DA:
+    BCF INTCON, 0
+    BTFSS estado, 4
+    RETURN
+    BTFSS CDIS, 1
+    GOTO VERI5DA
+    BTFSS ban, 1
+    RETURN
+    CLRF ban
+    DECF contlmina, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contlmina, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    MOVLW 9
+    MOVWF contlmina
+    GOTO VERI4DA
+
+VERI4DA:
+    DECF contldecmina, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldecmina, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    MOVLW 5
+    MOVWF contldecmina
+    RETURN
+
+VERI5DA:
+    BCF INTCON, 0
+    BTFSS estado, 4
+    RETURN
+    BTFSS CDIS, 2
+    RETURN
+    BTFSS ban, 1
+    RETURN
+    CLRF ban
+    DECF contlhoraa, F ;INCREMENTAR CONTADOR DE DECENAS DE SEGUNDO
+    MOVF contldechoraa, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 0 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    GOTO $+4 ;SI NO ES 0, RETORNAMOS
+    MOVF contlhoraa, W
+    SUBLW 255
+    BTFSS STATUS, 2
+    GOTO $+6
+    MOVLW 2
+    MOVWF contldechoraa
+    MOVLW 3
+    MOVWF contlhoraa
+    RETURN
+    MOVF contlhoraa, W ;MOVER EL VALOR DEL CONTADOR A W
+    SUBLW 255 ;RESTAR 6 DE W, YA QUE QUEREMOS QUE CUANDO LLEGUE A 60 SE REINICIE
+    BTFSS STATUS, 2 ;CHEQUEAR SI LA RESTA ES 0
+    RETURN ;SI NO ES 0, RETORNAMOS
+    DECF contldechoraa
+    MOVLW 9
+    MOVWF contlhoraa
+    RETURN
+
+LEDS:
+    BTFSS PIR1, 1
+    RETURN
+    BCF PIR1, 1
+    INCF contled, F
+    MOVF contled, W
+    SUBLW 49
+    BTFSS STATUS, 2
+    RETURN
+    CLRF contled
+    BCF PORTE, 0
+    BANKSEL TMR2 ;IR AL BANCO DEL TIMER 0
+    MOVLW 200 ;MOVER VALOR PARA DELAY DE 20ms a W
+    MOVWF TMR2 ;PONER EL VALOR PARA DELAY DE 20ms EN EL Timer0
+    RETURN
+
+LEDS2:
+    BTFSS PIR1, 1
+    RETURN
+    BCF PIR1, 1
+    INCF contled, F
+    MOVF contled, W
+    SUBLW 49
+    BTFSS STATUS, 2
+    RETURN
+    CLRF contled
+    BSF PORTE, 0
+    BANKSEL TMR2 ;IR AL BANCO DEL TIMER 0
+    MOVLW 200 ;MOVER VALOR PARA DELAY DE 20ms a W
+    MOVWF TMR2 ;PONER EL VALOR PARA DELAY DE 20ms EN EL Timer0
     RETURN
 
 END
