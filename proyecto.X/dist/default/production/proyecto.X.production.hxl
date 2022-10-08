@@ -9,13 +9,13 @@
 ### Memory Usage ###
  Intel Hex-file ranges:
   0h - 1h		(dist/default/production\proyecto.X.production.hex)
-  8h - 1FBh		(dist/default/production\proyecto.X.production.hex)
-  2A0h - B6Bh		(dist/default/production\proyecto.X.production.hex)
+  8h - 1FDh		(dist/default/production\proyecto.X.production.hex)
+  2A0h - B73h		(dist/default/production\proyecto.X.production.hex)
   400Eh - 4011h		(dist/default/production\proyecto.X.production.hex)
  Unused ranges:
   2h - 7h
-  1FCh - 29Fh
-  B6Ch - 400Dh
+  1FEh - 29Fh
+  B74h - 400Dh
 
 ### Hex Memory Map ###
  Legend:
@@ -55,7 +55,7 @@
 000001C0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
 000001D0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
 000001E0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
-000001F0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 -- -- -- --
+000001F0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 -- --
 ----------------------------------------------------------
 000002A0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
 000002B0 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
@@ -197,7 +197,8 @@
 00000B30 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
 00000B40 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
 00000B50 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
-00000B60 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 -- -- -- --
+00000B60 | H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1
+00000B70 | H1 H1 H1 H1 -- -- -- -- -- -- -- -- -- -- -- --
 ----------------------------------------------------------
 00004000 | -- -- -- -- -- -- -- -- -- -- -- -- -- -- H1 H1
 00004010 | H1 H1 -- -- -- -- -- -- -- -- -- -- -- -- -- --
